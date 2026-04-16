@@ -1,0 +1,62 @@
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+h1, h2 {
+  margin-bottom: 0.5rem;
+}
+
+/* === FREIGHT MODE TABS === */
+.freight-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+.freight-tabs .tab {
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  font-size: 0.95rem;
+  color: #374151;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+.freight-tabs .tab:hover {
+  background: #f3f4f6;
+  transform: translateY(-1px);
+}
+
+/* Maritime - Deep Ocean Blue */
+.freight-tabs .tab:nth-child(1).active {
+  background: #0c4a6e;
+  color: #f0f9ff;
+  border-color: #0c4a6e;
+  font-weight: 500;
+}
+
+/* Air - Bright Cyan/Sky */
+.freight-tabs .tab:nth-child(2).active {
+  background: #06b6d4;
+  color: #0e0e30;
+  border-color: #06b6d4;
+  font-weight: 500;
+}
+
+/* Road - Warm Amber/Orange */
+.freight-tabs .tab:nth-child(3).active {
+  background: #f59e0b;
+  color: #0e0e30;
+  border-color: #f59e0b;
+  font-weight: 500;
+}
+
+/* ... all your other CSS (buttons, forms, tables, etc.) ... */
