@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Container Planner - Merchandise Entry</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      padding: 1.5rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    h1, h2 {
+      margin-bottom: 0.5rem;
+    }
+
+    /* === FREIGHT MODE TABS === */
+    .freight-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .freight-tabs .tab {
+      padding: 0.5rem 1rem;
+      text-decoration: none;
+      font-size: 0.95rem;
+      color: #374151;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+    }
+    .freight-tabs .tab:hover {
+      background: #f3f4f6;
+      transform: translateY(-1px);
+    }
+
+    /* Maritime - Deep Ocean Blue */
+    .freight-tabs .tab:nth-child(1).active {
+      background: #0c4a6e;
+      color: #f0f9ff;
+      border-color: #0c4a6e;
+      font-weight: 500;
+    }
+
+    /* Air - Bright Cyan/Sky */
+    .freight-tabs .tab:nth-child(2).active {
+      background: #06b6d4;
+      color: #0e0e30;
+      border-color: #06b6d4;
+      font-weight: 500;
+    }
+
+    /* Road - Warm Amber/Orange */
+    .freight-tabs .tab:nth-child(3).active {
+      background: #f59e0b;
+      color: #0e0e30;
+      border-color: #f59e0b;
+      font-weight: 500;
+    }
+
+    form {
+      border: 1px solid #ddd;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      min-width: 150px;
+    }
+
+    label {
+      font-size: 0.9rem;
+      margin-bottom: 0.2rem;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      padding: 0.3rem 0.4rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-right: 1rem;
+    }
+
+    button {
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+    }
+
+    button[type="submit"] {
+      background: #111;
+      color: white;
+    }
+
+    /* Optional: text colors used in the buttons */
+    :root {
+      --btnTextColor1: #e5e7eb;  /* default text */
+      --btnTextColor2: #0e0e30;  /* text on hover */
+    }
+
+    /* Base size for small action buttons (you already use .btn-small) */
+    .btn-small {
+      font-size: 0.8rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* === FANCY BORDER + GLOW BUTTON BASE === */
+    .btn-edit,
+    .btn-delete {
+      position: relative;
+      display: inline-block;
+      color: var(--btnTextColor1);
+      border-radius: 26px;
+      box-sizing: border-box;
+      border: 2px solid transparent;
+      background-color: #0e0e30;
+      background-clip: padding-box;
+      overflow: hidden;
+      z-index: 0;
+      transition: color 0.2s ease;
+    }
+
+    /* BORDER GRADIENT LAYER (behind button content) */
+    .btn-edit::before,
+    .btn-delete::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      border: 2px solid transparent;
+      background-clip: padding-box, border-box;
+      background-repeat: repeat-x;
+      background-size: calc(100% + 4px) calc(100% + 4px);
+      background-position: center;
+      border-radius: 26px;
+      z-index: -1;
+      transition: border-color 0.2s;
+    }
+
+    /* Specific gradient colors for EDIT button */
+    .btn-edit::before {
+      background-image:
+        linear-gradient(#0e0e30, #0e0e30),              /* inner (fill) */
+        linear-gradient(90deg, #0ea5e9, #22c55e);       /* border gradient: blue -> green */
+    }
+
+    /* Specific gradient colors for DELETE button */
+    .btn-delete::before {
+      background-image:
+        linear-gradient(#0e0e30, #0e0e30),              /* inner (fill) */
+        linear-gradient(90deg, #f97316, #ef4444);       /* border gradient: orange -> red */
+    }
+
+    /* BIG CIRCLE GLOW LAYER (explodes on hover) */
+    .btn-edit::after,
+    .btn-delete::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 70vmax;
+      height: 70vmax;
+      border-radius: 50%;
+      transform-origin: center;
+      transform: translate(-50%, -50%) scale(0);
+      transition: transform 0.4s ease-in-out;
+      z-index: -1;
+    }
+
+    /* Gradient fill for the glow */
+    .btn-edit::after {
+      background-image: linear-gradient(90deg, #0ea5e9, #22c55e);
+    }
+
+    .btn-delete::after {
+      background-image: linear-gradient(90deg, #f97316, #ef4444);
+    }
+
+    /* HOVER: text color changes + glow expands */
+    .btn-edit:hover,
+    .btn-delete:hover {
+      color: var(--btnTextColor2);
+    }
+
+    .btn-edit:hover::after,
+    .btn-delete:hover::after {
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    /* ACTIVE (mouse down) */
+    .btn-edit:active,
+    .btn-delete:active {
+      color: #c3c4d5;
+    }
+
+    /* FOCUS (keyboard navigation) – highlight border */
+    .btn-edit:focus,
+    .btn-delete:focus {
+      outline: none; /* optional, remove default outline */
+    }
+
+    .btn-edit:focus::before,
+    .btn-delete:focus::before {
+      border-color: #00b8d9;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 0.4rem 0.6rem;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background: #f5f5f5;
+    }
+
+    .empty-state {
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: 0.5rem;
+    }
+
+    #totals-summary {
+      margin-top: 0.75rem;
+      font-size: 0.9rem;
+      color: #222;
+    }
+
+    #open-container-panel {
+      margin-top: 1rem;
+      background: #222;
+      color: #fff;
+      border: 2px solid transparent;
+      transition: 
+        background-color 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    /* HOVER EFFECT */
+    #open-container-panel:hover {
+      background: #fff;           /* inverse */
+      color: #000;                /* inverse */
+      border-color: #0a84ff;      /* choose: green/orange/blue etc. */
+      transform: scale(1.10);     /* slightly bigger */
+      box-shadow: 0 0 0 2px rgba(10,132,255,0.15);
+    }
+
+    /* === BOTTOM SLIDING PANEL === */
+    .container-panel-wrapper {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      justify-content: center;
+      pointer-events: none; /* only panel itself will be clickable */
+    }
+
+    .container-panel {
+      width: 100%;
+      max-width: 900px;
+      background: #fff;
+      border-top: 1px solid #ddd;
+      box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      padding: 1rem 1.5rem 1.25rem;
+      pointer-events: auto;
+    }
+
+    .container-panel.open {
+      transform: translateY(0);
+    }
+
+    .container-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .container-panel-header h2 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .container-panel-header button {
+      background: transparent;
+      border: none;
+      font-size: 1.2rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    #calc-button {
+      background: #111;
+      color: #fff;
+      margin-top: 0.5rem;
+    }
+
+    #container-result {
+      margin-top: 0.75rem;
+      font-size: 0.9rem;
+    }
+
+    #container-result p {
+      margin: 0.15rem 0;
+    }
+
+    #container-result strong {
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <!-- FREIGHT MODE TABS -->
+  <nav class="freight-tabs">
+    <a href="index.html" class="tab active">Maritime freight</a>
+    <a href="air.html" class="tab">Air freight</a>
+    <a href="road.html" class="tab">Road freight</a>
+  </nav>
+
+  <h1>Merchandise / Pallet Entry</h1>
+  <p>
+    👉 For dimensions: you can type in <strong>m</strong> (ex: 1.2) or <strong>cm</strong> (ex: 120).<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;The app will auto-detect and convert to <strong>m</strong> internally.<br/>
+    👉 For weight: type in <strong>kg</strong>. The app converts to <strong>tonnes (t)</strong> internally.
+  </p>
+
+  <!-- STEP 1: FORM -->
+  <form id="item-form">
+    <div class="row">
+      <div class="field" style="flex: 1 1 250px;">
+        <label for="name">Item / Pallet name</label>
+        <input type="text" id="name" required placeholder="Example: Glassware cartons" />
+      </div>
+
+      <div class="field">
+        <label for="quantity">Quantity</label>
+        <input type="number" id="quantity" min="1" value="1" required />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="length">Length (m or cm)</label>
+        <input type="number" id="length" min="0.01" step="0.01" required />
+      </div>
+      <div class="field">
+        <label for="width">Width (m or cm)</label>
+        <input type="number" id="width" min="0.01" step="0.01" required />
+      </div>
+      <div class="field">
+        <label for="height">Height (m or cm)</label>
+        <input type="number" id="height" min="0.01" step="0.01" required />
+      </div>
+      <div class="field">
+        <label for="weight">Weight per unit (kg)</label>
+        <input type="number" id="weight" min="0" step="0.1" required />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="checkbox-group">
+        <input type="checkbox" id="stackable" />
+        <label for="stackable">Stackable</label>
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="fragile" />
+        <label for="fragile">Fragile</label>
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="rotationAllowed" checked />
+        <label for="rotationAllowed">Rotation allowed</label>
+      </div>
+    </div>
+
+    <button type="submit">Add item</button>
+  </form>
+
+  <!-- STEP 1: LIST -->
+  <h2>Current merchandise list</h2>
+  <div id="empty-message" class="empty-state">
+    No items yet. Add your first pallet or box above.
+  </div>
+  <table id="items-table" style="display:none;">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Qty</th>
+        <th>Dimensions</th>
+        <th>Weight</th>
+        <th>Stackable</th>
+        <th>Fragile</th>
+        <th>Rotation</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div id="totals-summary"></div>
+
+  <!-- BUTTON TO OPEN BOTTOM PANEL -->
+  <button id="open-container-panel">Next: pallet & container</button>
+
+  <!-- STEP 2: BOTTOM SLIDING PANEL -->
+  <div class="container-panel-wrapper">
+    <div class="container-panel" id="container-panel">
+      <div class="container-panel-header">
+        <h2>Pallet & Container selection</h2>
+        <button id="close-panel" title="Close">×</button>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="pallet-type">Pallet type</label>
+          <select id="pallet-type">
+            <option value="none">No pallet / mixed</option>
+            <option value="euro">Euro pallet (1200 × 800)</option>
+            <option value="iso">ISO pallet (1200 × 1000)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="container-type">Container type</label>
+          <select id="container-type">
+            <option value="20">20' Dry Standard</option>
+            <option value="40">40' Dry Standard</option>
+            <option value="40HC">40' High Cube</option>
+          </select>
+        </div>
+      </div>
+
+      <button id="calc-button">Calculate containers / LCL / FCL</button>
+
+      <div id="container-result"></div>
+    </div>
+  </div>
+
+  <!--  JS / LOGIC PART  -->
+  <script>
+    // ==== 1) Helper: convert m OR cm -> meters ====
+    function toMeters(raw) {
+      const value = parseFloat(raw);
+      if (isNaN(value) || value <= 0) return null;
+
+      // If bigger than 10, we assume cm (ex: 120 -> 1.20 m)
+      if (value > 10) {
+        return value / 100;
+      }
+      // Otherwise, it's already in meters (ex: 1.2 -> 1.2 m)
+      return value;
+    }
+
+    // ==== 2) Data model: all items will be stored in this array ====
+    const items = [];
+
+    // ==== 3) Get DOM elements (step 1) ====
+    const form = document.getElementById("item-form");
+    const nameInput = document.getElementById("name");
+    const quantityInput = document.getElementById("quantity");
+    const lengthInput = document.getElementById("length");
+    const widthInput = document.getElementById("width");
+    const heightInput = document.getElementById("height");
+    const weightInput = document.getElementById("weight");
+    const stackableInput = document.getElementById("stackable");
+    const fragileInput = document.getElementById("fragile");
+    const rotationInput = document.getElementById("rotationAllowed");
+
+    const itemsTable = document.getElementById("items-table");
+    const itemsTbody = itemsTable.querySelector("tbody");
+    const emptyMessage = document.getElementById("empty-message");
+    const totalsSummary = document.getElementById("totals-summary");
+
+    // ==== 4) Handle form submission (add item) ====
+    form.addEventListener("submit", function (event) {
+      event.preventDefault(); // block full page reload
+
+      const name = nameInput.value.trim();
+      const quantity = parseInt(quantityInput.value, 10);
+
+      const lengthRaw = parseFloat(lengthInput.value);
+      const widthRaw = parseFloat(widthInput.value);
+      const heightRaw = parseFloat(heightInput.value);
+      const weightKg = parseFloat(weightInput.value);
+
+      if (!name) {
+        alert("Please enter a name for the item.");
+        return;
+      }
+
+      if (quantity <= 0 || !lengthRaw || !widthRaw || !heightRaw || weightKg < 0) {
+        alert("Check your numbers: quantity and dimensions must be > 0.");
+        return;
+      }
+
+      // Convert to meters (depending if user typed m or cm)
+      const lengthM = toMeters(lengthRaw);
+      const widthM = toMeters(widthRaw);
+      const heightM = toMeters(heightRaw);
+
+      if (!lengthM || !widthM || !heightM) {
+        alert("Problem converting dimensions. Please check your values.");
+        return;
+      }
+
+      // Convert kg -> tonnes
+      const weightT = weightKg / 1000;
+
+      // Booleans from checkboxes
+      const stackable = stackableInput.checked;
+      const fragile = fragileInput.checked;
+      const rotationAllowed = rotationInput.checked;
+
+      const newItem = {
+        id: items.length + 1,
+        name,
+        quantity,
+
+        // What user typed (for info)
+        lengthRaw,
+        widthRaw,
+        heightRaw,
+        weightKg,
+
+        // Standard internal units
+        lengthM,
+        widthM,
+        heightM,
+        weightT,
+
+        stackable,
+        fragile,
+        rotationAllowed
+      };
+
+      items.push(newItem);
+      console.log("Current items array:", items);
+
+      renderItemsTable();
+      form.reset();
+      rotationInput.checked = true;
+    });
+
+    // ==== 5) Compute total volume / weight ====
+    function computeTotals() {
+      let totalVolumeM3 = 0;
+      let totalWeightT = 0;
+
+      items.forEach(item => {
+        const volumeM3 = item.lengthM * item.widthM * item.heightM;
+        totalVolumeM3 += volumeM3 * item.quantity;
+        totalWeightT += item.weightT * item.quantity;
+      });
+
+      return { totalVolumeM3, totalWeightT };
+    }
+
+    // ==== 6) Render the table + totals ====
+    function renderItemsTable() {
+      if (items.length === 0) {
+        itemsTable.style.display = "none";
+        emptyMessage.style.display = "block";
+        totalsSummary.textContent = "";
+        return;
+      }
+
+      itemsTable.style.display = "table";
+      emptyMessage.style.display = "none";
+
+      itemsTbody.innerHTML = "";
+
+      items.forEach((item, index) => {
+        const tr = document.createElement("tr");
+
+        const volumeM3 = item.lengthM * item.widthM * item.heightM;
+        const totalWeightT = item.weightT * item.quantity;
+
+        tr.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${item.name}</td>
+          <td>${item.quantity}</td>
+          <td>
+            Entered: ${item.lengthRaw} × ${item.widthRaw} × ${item.heightRaw}<br/>
+            <small>Interpreted as: ${item.lengthM.toFixed(2)} × ${item.widthM.toFixed(2)} × ${item.heightM.toFixed(2)} m</small><br/>
+            <small>Vol (1 unit): ${volumeM3.toFixed(3)} m³</small>
+          </td>
+          <td>
+            ${item.weightKg} kg / unit<br/>
+            <small>${item.weightT.toFixed(3)} t / unit</small><br/>
+            <small>Total: ${totalWeightT.toFixed(3)} t</small>
+          </td>
+          <td>${item.stackable ? "Yes" : "No"}</td>
+          <td>${item.fragile ? "Yes" : "No"}</td>
+          <td>${item.rotationAllowed ? "Yes" : "No"}</td>
+          <td>
+            <button type="button" class="btn-small btn-edit" onclick="editItem(${index})">Edit</button>
+            <button type="button" class="btn-small btn-delete" onclick="deleteItem(${index})">Delete</button>
+          </td>
+        `;
+
+        itemsTbody.appendChild(tr);
+      });
+
+      const { totalVolumeM3, totalWeightT } = computeTotals();
+      totalsSummary.textContent =
+        `Total volume: ${totalVolumeM3.toFixed(3)} m³ | Total weight: ${totalWeightT.toFixed(3)} t`;
+    }
+
+    // ==== 7) Delete one line safely ====
+    function deleteItem(index) {
+      if (!confirm("Delete this line?")) return;
+      items.splice(index, 1); // remove 1 element at position 'index'
+      renderItemsTable();
+    }
+
+    // ==== 8) Edit one line: load it back into the form, then remove old entry ====
+    function editItem(index) {
+      const item = items[index];
+      if (!item) return;
+
+      // Put values back into form
+      nameInput.value = item.name;
+      quantityInput.value = item.quantity;
+      lengthInput.value = item.lengthRaw;
+      widthInput.value = item.widthRaw;
+      heightInput.value = item.heightRaw;
+      weightInput.value = item.weightKg;
+      stackableInput.checked = item.stackable;
+      fragileInput.checked = item.fragile;
+      rotationInput.checked = item.rotationAllowed;
+
+      // Remove current line from the list
+      items.splice(index, 1);
+      renderItemsTable();
+
+      // Now user can fix values and click "Add item" again
+    }
+
+    // ==== 9) Pallet & container logic (step 2) ====
+
+    // Simple container database
+    const containers = {
+      "20": {
+        name: "20' Dry Standard",
+        lengthM: 5.9,
+        widthM: 2.35,
+        heightM: 2.39,
+        maxPayloadT: 28
+      },
+      "40": {
+        name: "40' Dry Standard",
+        lengthM: 12.03,
+        widthM: 2.35,
+        heightM: 2.39,
+        maxPayloadT: 27
+      },
+      "40HC": {
+        name: "40' High Cube",
+        lengthM: 12.03,
+        widthM: 2.35,
+        heightM: 2.69,
+        maxPayloadT: 26
+      }
+    };
+
+    const openPanelBtn = document.getElementById("open-container-panel");
+    const containerPanel = document.getElementById("container-panel");
+    const closePanelBtn = document.getElementById("close-panel");
+
+    const palletTypeSelect = document.getElementById("pallet-type");
+    const containerTypeSelect = document.getElementById("container-type");
+    const calcButton = document.getElementById("calc-button");
+    const containerResult = document.getElementById("container-result");
+
+    openPanelBtn.addEventListener("click", () => {
+      containerPanel.classList.add("open");
+    });
+
+    closePanelBtn.addEventListener("click", () => {
+      containerPanel.classList.remove("open");
+    });
+
+    calcButton.addEventListener("click", () => {
+      if (items.length === 0) {
+        alert("Add at least one item before calculating containers.");
+        return;
+      }
+
+      const containerKey = containerTypeSelect.value;
+      const container = containers[containerKey];
+      if (!container) {
+        alert("Unknown container type.");
+        return;
+      }
+
+      const { totalVolumeM3, totalWeightT } = computeTotals();
+
+      const containerVolumeM3 = container.lengthM * container.widthM * container.heightM;
+
+      // How many containers by volume and by weight?
+      const containersByVolume = totalVolumeM3 > 0 ? Math.ceil(totalVolumeM3 / containerVolumeM3) : 0;
+      const containersByWeight = totalWeightT > 0 ? Math.ceil(totalWeightT / container.maxPayloadT) : 0;
+
+      const containersNeeded = Math.max(containersByVolume, containersByWeight);
+
+      if (containersNeeded === 0) {
+        containerResult.innerHTML = "<p>No merchandise to ship.</p>";
+        return;
+      }
+
+      // Average load per container
+      const avgVolumePerContainer = totalVolumeM3 / containersNeeded;
+      const avgWeightPerContainerT = totalWeightT / containersNeeded;
+
+      const utilizationVolume = avgVolumePerContainer / containerVolumeM3; // 0..1+
+      const utilizationWeight = avgWeightPerContainerT / container.maxPayloadT;
+
+      let shipmentType;
+      if (containersNeeded === 1 && utilizationVolume < 0.7 && utilizationWeight < 0.7) {
+        shipmentType = "LCL (Less than Container Load) – shipment is relatively small compared to one full container.";
+      } else {
+        shipmentType = "FCL (Full Container Load) – shipment is large enough that you'd typically book full container(s).";
+      }
+
+      containerResult.innerHTML = `
+        <p><strong>Container selected:</strong> ${container.name}</p>
+        <p><strong>Internal volume (1 container):</strong> ${containerVolumeM3.toFixed(2)} m³</p>
+        <p><strong>Max payload (1 container):</strong> ${container.maxPayloadT.toFixed(1)} t</p>
+        <p><strong>Total shipment volume:</strong> ${totalVolumeM3.toFixed(3)} m³</p>
+        <p><strong>Total shipment weight:</strong> ${totalWeightT.toFixed(3)} t</p>
+        <p><strong>Estimated containers needed:</strong> ${containersNeeded} (by volume: ${containersByVolume}, by weight: ${containersByWeight})</p>
+        <p><strong>Average utilization per container:</strong> 
+          ${(utilizationVolume * 100).toFixed(1)}% volume, 
+          ${(utilizationWeight * 100).toFixed(1)}% weight
+        </p>
+        <p><strong>Commercial type (hint):</strong> ${shipmentType}</p>
+        <p><small>Pallet type selected: ${palletTypeSelect.options[palletTypeSelect.selectedIndex].text}</small></p>
+      `;
+    });
+  </script>
+</body>
+</html>
